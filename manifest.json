@@ -1,0 +1,29 @@
+{
+    "name": "sore-github",
+    "description": "GitHub で MusicXML を画像で表示する拡張機能",
+    "version": "0.1.0",
+    "manifest_version": 3,
+    "permissions": [
+        "scripting"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://github.com/*"
+            ],
+            "js": [
+                "githubPage.js"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "src/*"
+            ],
+            "matches": [
+                "https://github.com/*"
+            ]
+        }
+    ]
+}
