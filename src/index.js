@@ -1,3 +1,5 @@
+import { PullPageExtension } from "./pullScoreManager.js";
+
 const scoreViewButtonId = "score-github-view-button-id";
 const scoreNextButtonId = "score-github-next-button-id";
 const scorePrevButtonId = "score-github-prev-button-id";
@@ -157,6 +159,7 @@ class scoreManager {
 
 // --------------------------------------------------------------------------
 
+const pullPage = new PullPageExtension();
 const scoreM = new scoreManager();
 let pathnameCache = undefined;
 const observer = new MutationObserver(() => {
@@ -177,6 +180,14 @@ const observer = new MutationObserver(() => {
             scoreM.showScore();
             scoreM.getSvgAsync(rawUrl);
         }
+    } else if (/^\/.+?\/.+?\/pull\/(\d+)\/files/.test(pathnameCache)) {
+        // 非同期の初期化処理が失敗したときに再度処理が実行できるようにコールバックを設定する
+        const callBack = (result) => {
+            if (!result) {
+                pathnameCache = undefined;
+            }
+        };
+        pullPage.initAsync(callBack);
     }
 });
 window.onload = () => {

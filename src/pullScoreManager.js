@@ -1,3 +1,175 @@
+class ImageManager {
+    constructor(musicFileDiffContainerElm, relativeFilePath, baseUrl, headUrl) {
+        this.baseSvg = "";
+        this.headSvg = "";
+        this.baseUrl = baseUrl;
+        this.headUrl = headUrl;
+        this.baseTk = undefined;
+        this.headTk = undefined;
+        this.basePageCount = 0;
+        this.headPageCount = 0;
+        this.currentPage = 1;
+        this.musicFileDiffContainerElm = musicFileDiffContainerElm;
+        this.relativeFilePath = relativeFilePath;
+
+        const idSuffix = btoa(relativeFilePath);
+
+        this.imageRootContainerId =
+            "github-musical-score-pull-page-image-root-container-id-" +
+            idSuffix;
+
+        const imageRootContainer = document.createElement("div");
+        imageRootContainer.id = this.imageRootContainerId;
+        imageRootContainer.className =
+            "data highlight js-blob-wrapper pull-page-image-root";
+        imageRootContainer.style.overflowX = "auto";
+
+        // const table = document.createElement("table");
+        // const tbody = document.createElement("tbody");
+        // const tr = document.createElement("tr");
+        // const baseTd = document.createElement("td");
+        // const headTd = document.createElement("td");
+
+        // tr.appendChild(baseTd);
+        // tr.appendChild(headTd);
+        // tbody.appendChild(tr);
+        // table.appendChild(tbody);
+        // imageRootContainer.appendChild(table);
+
+        // this.baseImageContainer = baseTd;
+        // this.headImageContainer = headTd;
+
+        const baseImageContainer = document.createElement("div");
+        baseImageContainer.className = "pull-page-base-image";
+        const headImageContainer = document.createElement("div");
+        headImageContainer.className = "pull-page-head-image";
+        imageRootContainer.appendChild(baseImageContainer);
+        imageRootContainer.appendChild(headImageContainer);
+        this.baseImageContainer = baseImageContainer;
+        this.headImageContainer = headImageContainer;
+
+        this.rootContainer =
+            musicFileDiffContainerElm.getElementsByClassName(
+                "js-file-content"
+            )[0];
+        this.imageRootContainer = imageRootContainer;
+        this.xmlRootContainer = this.rootContainer.children[0];
+    }
+
+    async initAsync() {
+        {
+            const xml = await fetch(this.baseUrl).then((r) => r.text());
+
+            const tk = new verovio.toolkit();
+            const svg = tk.renderData(xml, {});
+            this.basePageCount = tk.getPageCount();
+
+            this.baseSvg = svg;
+            this.baseTk = tk;
+        }
+
+        {
+            const xml = await fetch(this.headUrl).then((r) => r.text());
+
+            const tk = new verovio.toolkit();
+            const svg = tk.renderData(xml, {});
+            this.headPageCount = tk.getPageCount();
+
+            this.headSvg = svg;
+            this.headTk = tk;
+        }
+
+        this.baseImageContainer.innerHTML = this.baseSvg;
+        this.headImageContainer.innerHTML = this.headSvg;
+
+        this.showScore();
+    }
+
+    prev() {
+        if (this.currentPage <= 1) {
+            return;
+        }
+
+        this.currentPage--;
+
+        const page = this.currentPage;
+        if (this.baseTk) {
+            if (page <= this.basePageCount) {
+                const svg = this.baseTk.renderToSVG(page);
+                this.baseSvg = svg;
+            }
+        }
+
+        if (this.headTk) {
+            if (page <= this.headPageCount) {
+                const svg = this.headTk.renderToSVG(page);
+                this.headSvg = svg;
+            }
+        }
+
+        this.baseImageContainer.innerHTML = this.baseSvg;
+        this.headImageContainer.innerHTML = this.headSvg;
+    }
+    next() {
+        if (
+            this.basePageCount <= this.currentPage &&
+            this.headPageCount <= this.currentPage
+        ) {
+            return;
+        }
+
+        this.currentPage++;
+
+        const page = this.currentPage;
+        if (this.baseTk) {
+            if (page <= this.basePageCount) {
+                const svg = this.baseTk.renderToSVG(page);
+                this.baseSvg = svg;
+            } else {
+                this.baseSvg = "";
+            }
+        }
+
+        if (this.headTk) {
+            if (page <= this.headPageCount) {
+                const svg = this.headTk.renderToSVG(page);
+                this.headSvg = svg;
+            } else {
+                this.headSvg = "";
+            }
+        }
+
+        this.baseImageContainer.innerHTML = this.baseSvg;
+        this.headImageContainer.innerHTML = this.headSvg;
+    }
+
+    showScore() {
+        if (this.xmlRootContainer) {
+            this.xmlRootContainer.style.display = "none";
+        }
+
+        let imageRootContainer = document.getElementById(
+            this.imageRootContainerId
+        );
+        if (!imageRootContainer) {
+            imageRootContainer = this.imageRootContainer;
+            this.rootContainer.appendChild(imageRootContainer);
+        }
+    }
+
+    hideScore() {
+        if (this.xmlRootContainer) {
+            this.xmlRootContainer.style.display = "";
+        }
+        const imageRootContainer = document.getElementById(
+            this.imageRootContainerId
+        );
+        if (imageRootContainer) {
+            imageRootContainer.parentElement.removeChild(imageRootContainer);
+        }
+    }
+}
+
 export class PullPageExtension {
     constructor() {}
 
@@ -8,10 +180,10 @@ export class PullPageExtension {
     _getMusicFileDiffContainerElms() {
         const parentContainer = document.getElementsByClassName(
             "js-diff-progressive-container"
-        );
+        )[0];
         if (!parentContainer) return [];
 
-        const children = parentContainer[0].children;
+        const children = parentContainer.children ?? [];
 
         const musicFileDiffContainers = [];
 
@@ -120,7 +292,7 @@ export class PullPageExtension {
         return true;
     }
 
-    async _getCommitHashAsync() {
+    async _getInfoAsync() {
         const match = /^\/(.+?)\/(.+?)\/pull\/(\d+)\/files/.exec(
             location.pathname
         );
@@ -131,30 +303,74 @@ export class PullPageExtension {
         const repo = match[2];
         const pullNo = match[3];
 
-        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/pulls/${pullNo}`;
+        const apiPullUrl = `https://api.github.com/repos/${owner}/${repo}/pulls/${pullNo}`;
 
-        const json = await fetch(apiUrl).then((r) => r.json());
+        const pullJson = await fetch(apiPullUrl).then((r) => r.json());
+
+        const apiFilesUrl = `https://api.github.com/repos/${owner}/${repo}/pulls/${pullNo}/files`;
+
+        const filesJson = await fetch(apiFilesUrl).then((r) => r.json());
 
         return {
-            base: json.base.sha,
-            head: json.head.sha,
+            owner: owner,
+            repo: repo,
+            pullNo: pullNo,
+            base: pullJson.base.sha,
+            head: pullJson.head.sha,
+            fileCount: filesJson.length,
         };
     }
 
-    async initAsync() {
-        const baseHash = await this._getCommitHashAsync();
-        if (!baseHash) return;
+    async initAsync(callBack) {
+        const info = await this._getInfoAsync();
+        if (!info) {
+            if (callBack) {
+                callBack(false);
+            }
+        }
 
         console.log("base hash");
-        console.log(baseHash);
+        console.log(info);
 
         const musicFileDiffContainerElms =
             this._getMusicFileDiffContainerElms();
 
+        console.log(musicFileDiffContainerElms.length);
+
         for (let i = 0; i < musicFileDiffContainerElms.length; ++i) {
             const elm = musicFileDiffContainerElms[i];
 
-            this._setButton(elm);
+            const relativeFilePath = this._getFilePath(elm);
+
+            const baseFileUrl = `https://raw.githubusercontent.com/${info.owner}/${info.repo}/${info.base}/${relativeFilePath}`;
+            const headFileUrl = `https://raw.githubusercontent.com/${info.owner}/${info.repo}/${info.head}/${relativeFilePath}`;
+
+            const imageManager = new ImageManager(
+                elm,
+                relativeFilePath,
+                baseFileUrl,
+                headFileUrl
+            );
+
+            const prevClick = () => {
+                imageManager.prev();
+            };
+            const nextClick = () => {
+                imageManager.next();
+            };
+            const xmlClick = () => {
+                imageManager.hideScore();
+            };
+            const scoreClick = () => {
+                imageManager.showScore();
+            };
+            this._setButton(elm, prevClick, nextClick, xmlClick, scoreClick);
+
+            await imageManager.initAsync();
+        }
+
+        if (callBack) {
+            callBack(musicFileDiffContainerElms.length === info.fileCount);
         }
     }
 }

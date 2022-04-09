@@ -2,3 +2,30 @@
     width: 100%;
     height: auto;
 }
+
+.pull-page-image-root{
+    display: flex;
+    width: 100%;
+}
+
+.pull-page-base-image {
+    width: 50%;
+    background-color: white;
+    margin: 0.5rem 0.25rem 0.5rem 0.5rem;
+    border: 1px solid rgb(8, 8, 8);
+}
+.pull-page-base-image > svg {
+    width: 100%;
+    height: auto;
+}
+
+.pull-page-head-image{
+    width: 50%;
+    background-color: white;
+    margin: 0.5rem 0.5rem 0.5rem 0.25rem;
+    border: 1px solid rgb(8, 8, 8);
+}
+.pull-page-head-image > svg {
+    width: 100%;
+    height: auto;
+}
