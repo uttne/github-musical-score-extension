@@ -108,7 +108,7 @@ export class PullPageExtension{
         return true;
     }
 
-    async _getBaseCommitHashAsync(){
+    async _getCommitHashAsync(){
         const match = /^\/(.+?)\/(.+?)\/pull\/(\d+)\/files/.exec(location.pathname);
 
         if(!match)return undefined;
@@ -121,12 +121,17 @@ export class PullPageExtension{
 
         const json = await fetch(apiUrl).then(r => r.json());
 
-        return json.base.sha;
+        return {
+            base: json.base.sha,
+            head: json.head.sha
+        };
     }
 
     async initAsync(){
 
-        const baseHash = await this._getBaseCommitHashAsync();
+        const baseHash = await this._getCommitHashAsync();
+        if(!baseHash)return;
+
         console.log("base hash");
         console.log(baseHash);
 
