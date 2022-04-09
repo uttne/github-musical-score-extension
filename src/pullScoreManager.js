@@ -1,85 +1,97 @@
+export class PullPageExtension {
+    constructor() {}
 
-export class PullPageExtension{
-    constructor(){
-
-    }
-
-    _getFilePath(musicFileDiffContainerElm){
+    _getFilePath(musicFileDiffContainerElm) {
         return musicFileDiffContainerElm.dataset.tagsearchPath;
     }
 
-    _getMusicFileDiffContainerElms(){
-        const parentContainer = document.getElementsByClassName("js-diff-progressive-container");
-        if(!parentContainer)return [];
+    _getMusicFileDiffContainerElms() {
+        const parentContainer = document.getElementsByClassName(
+            "js-diff-progressive-container"
+        );
+        if (!parentContainer) return [];
 
         const children = parentContainer[0].children;
 
-        const musicFileDiffContainers = []
+        const musicFileDiffContainers = [];
 
-        for(let i = 0;i < children.length;++i){
+        for (let i = 0; i < children.length; ++i) {
             const child = children[i];
             const path = this._getFilePath(child);
 
             console.log(path);
 
-            const ext = path.split(".").slice(-1)[0].toLowerCase()
+            const ext = path.split(".").slice(-1)[0].toLowerCase();
 
-            if(ext !== "musicxml"){
+            if (ext !== "musicxml") {
                 continue;
             }
-            
+
             musicFileDiffContainers.push(child);
         }
 
         return musicFileDiffContainers;
     }
 
-    _setButton(musicFileDiffContainerElm, prevClick, nextClick, xmlClick, scoreClick){
+    _setButton(
+        musicFileDiffContainerElm,
+        prevClick,
+        nextClick,
+        xmlClick,
+        scoreClick
+    ) {
         const path = this._getFilePath(musicFileDiffContainerElm);
         const idSuffix = btoa(path);
-        const buttonContainerId = "github-musical-score-pull-page-button-container-id-" + idSuffix;
-        const prevButtonId = "github-musical-score-pull-page-prev-button-id-" + idSuffix;
-        const nextButtonId = "github-musical-score-pull-page-next-button-id-" + idSuffix;
-        const viewButtonId = "github-musical-score-pull-page-view-button-id-" + idSuffix;
+        const buttonContainerId =
+            "github-musical-score-pull-page-button-container-id-" + idSuffix;
+        const prevButtonId =
+            "github-musical-score-pull-page-prev-button-id-" + idSuffix;
+        const nextButtonId =
+            "github-musical-score-pull-page-next-button-id-" + idSuffix;
+        const viewButtonId =
+            "github-musical-score-pull-page-view-button-id-" + idSuffix;
 
-        const acctionsContainer = musicFileDiffContainerElm.getElementsByClassName("file-actions")[0];
+        const acctionsContainer =
+            musicFileDiffContainerElm.getElementsByClassName("file-actions")[0];
 
-        if(!acctionsContainer)return false;
+        if (!acctionsContainer) return false;
 
         let container = document.getElementById(buttonContainerId);
-        if(!container){
+        if (!container) {
             container = document.createElement("div");
             container.className = "d-flex";
-            acctionsContainer.insertBefore(container, acctionsContainer.children[0]);
+            acctionsContainer.insertBefore(
+                container,
+                acctionsContainer.children[0]
+            );
         }
 
         let prevButton = document.getElementById(prevButtonId);
-        if(!prevButton){
+        if (!prevButton) {
             prevButton = document.createElement("a");
             prevButton.id = prevButtonId;
             prevButton.innerText = "Prev";
             prevButton.className = "btn-sm btn BtnGroup-item";
             prevButton.href = "javascript:void(0);";
-            if(prevClick){
+            if (prevClick) {
                 prevButton.onclick = prevClick;
             }
         }
-        
+
         let nextButton = document.getElementById(nextButtonId);
-        if(!nextButton){
+        if (!nextButton) {
             nextButton = document.createElement("a");
             nextButton.id = nextButtonId;
             nextButton.innerText = "Next";
             nextButton.className = "btn-sm btn BtnGroup-item";
             nextButton.href = "javascript:void(0);";
-            if(nextClick){
+            if (nextClick) {
                 nextButton.onclick = nextClick;
             }
         }
 
-        
         let viewButton = document.getElementById(viewButtonId);
-        if(!viewButton){
+        if (!viewButton) {
             viewButton = document.createElement("a");
             viewButton.id = viewButtonId;
             viewButton.innerText = "Xml";
@@ -89,11 +101,11 @@ export class PullPageExtension{
                 const text = viewButton.innerText;
                 if (text !== "Score") {
                     // Xml という表示をクリックしたとき実行
-                    if(xmlClick) xmlClick();
+                    if (xmlClick) xmlClick();
                     viewButton.innerText = "Score";
                 } else {
                     // Score という表示をクリックしたとき実行
-                    if(scoreClick) scoreClick();
+                    if (scoreClick) scoreClick();
                     viewButton.innerText = "Xml";
                 }
             };
@@ -108,10 +120,12 @@ export class PullPageExtension{
         return true;
     }
 
-    async _getCommitHashAsync(){
-        const match = /^\/(.+?)\/(.+?)\/pull\/(\d+)\/files/.exec(location.pathname);
+    async _getCommitHashAsync() {
+        const match = /^\/(.+?)\/(.+?)\/pull\/(\d+)\/files/.exec(
+            location.pathname
+        );
 
-        if(!match)return undefined;
+        if (!match) return undefined;
 
         const owner = match[1];
         const repo = match[2];
@@ -119,29 +133,28 @@ export class PullPageExtension{
 
         const apiUrl = `https://api.github.com/repos/${owner}/${repo}/pulls/${pullNo}`;
 
-        const json = await fetch(apiUrl).then(r => r.json());
+        const json = await fetch(apiUrl).then((r) => r.json());
 
         return {
             base: json.base.sha,
-            head: json.head.sha
+            head: json.head.sha,
         };
     }
 
-    async initAsync(){
-
+    async initAsync() {
         const baseHash = await this._getCommitHashAsync();
-        if(!baseHash)return;
+        if (!baseHash) return;
 
         console.log("base hash");
         console.log(baseHash);
 
-        const musicFileDiffContainerElms = this._getMusicFileDiffContainerElms();
+        const musicFileDiffContainerElms =
+            this._getMusicFileDiffContainerElms();
 
-        for(let i = 0;i < musicFileDiffContainerElms.length; ++i){
+        for (let i = 0; i < musicFileDiffContainerElms.length; ++i) {
             const elm = musicFileDiffContainerElms[i];
 
             this._setButton(elm);
         }
     }
 }
-
