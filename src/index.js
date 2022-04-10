@@ -1,4 +1,4 @@
-import { PullPageExtension } from "./pullScoreManager.js";
+import { PullPageExtension } from "./pull-page-extension.js";
 
 const scoreViewButtonId = "score-github-view-button-id";
 const scoreNextButtonId = "score-github-next-button-id";
