@@ -311,13 +311,19 @@ export class PullPageExtension {
 
         const filesJson = await fetch(apiFilesUrl).then((r) => r.json());
 
+        // MusicXML の個数をカウントする
+        const fileCount = filesJson
+            .map((x) => x.filename)
+            .filter((name) => /[.]musicxml$/.test(name.toLowerCase())).length;
+        console.log(`musicxml count: ${fileCount}`);
+
         return {
             owner: owner,
             repo: repo,
             pullNo: pullNo,
             base: pullJson.base.sha,
             head: pullJson.head.sha,
-            fileCount: filesJson.length,
+            fileCount: fileCount,
         };
     }
 
