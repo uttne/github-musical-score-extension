@@ -170,8 +170,25 @@ class ImageManager {
     }
 }
 
+class ApiCache {
+    constructor() {
+        this._cache = {};
+    }
+
+    get(key) {
+        return this._cache[key];
+    }
+
+    set(key, data) {
+        this._cache[key] = data;
+        return data;
+    }
+}
+
 export class PullPageExtension {
-    constructor() {}
+    constructor() {
+        this.cache = new ApiCache();
+    }
 
     _getFilePath(musicFileDiffContainerElm) {
         return musicFileDiffContainerElm.dataset.tagsearchPath;
@@ -304,12 +321,18 @@ export class PullPageExtension {
         const pullNo = match[3];
 
         const apiPullUrl = `https://api.github.com/repos/${owner}/${repo}/pulls/${pullNo}`;
-
-        const pullJson = await fetch(apiPullUrl).then((r) => r.json());
+        let pullJson = this.cache.get(apiPullUrl);
+        if (!pullJson) {
+            pullJson = await fetch(apiPullUrl).then((r) => r.json());
+            this.cache.set(apiPullUrl, pullJson);
+        }
 
         const apiFilesUrl = `https://api.github.com/repos/${owner}/${repo}/pulls/${pullNo}/files`;
-
-        const filesJson = await fetch(apiFilesUrl).then((r) => r.json());
+        let filesJson = this.cache.get(apiFilesUrl);
+        if (!filesJson) {
+            filesJson = await fetch(apiFilesUrl).then((r) => r.json());
+            this.cache.set(apiFilesUrl, filesJson);
+        }
 
         // MusicXML の個数をカウントする
         const fileCount = filesJson

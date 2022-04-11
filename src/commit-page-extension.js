@@ -155,8 +155,25 @@ class ImageManager {
     }
 }
 
+class ApiCache {
+    constructor() {
+        this._cache = {};
+    }
+
+    get(key) {
+        return this._cache[key];
+    }
+
+    set(key, data) {
+        this._cache[key] = data;
+        return data;
+    }
+}
+
 export class CommitPageExtension {
-    constructor() {}
+    constructor() {
+        this.cache = new ApiCache();
+    }
 
     _getFilePath(musicFileDiffContainerElm) {
         return musicFileDiffContainerElm.dataset.tagsearchPath;
@@ -289,8 +306,11 @@ export class CommitPageExtension {
         const headSha = match[3];
 
         const apiCommitUrl = `https://api.github.com/repos/${owner}/${repo}/commits/${headSha}`;
-        const commitJson = await fetch(apiCommitUrl).then((r) => r.json());
-
+        let commitJson = this.cache.get(apiCommitUrl);
+        if (!commitJson) {
+            commitJson = await fetch(apiCommitUrl).then((r) => r.json());
+            this.cache.set(apiCommitUrl, commitJson);
+        }
         // MusicXML の個数をカウントする
         const fileCount = commitJson.files
             .map((x) => x.filename)
@@ -305,9 +325,13 @@ export class CommitPageExtension {
             const parent = parents[i];
 
             const apiParentCommitUrl = `https://api.github.com/repos/${owner}/${repo}/commits/${parent.sha}`;
-            const parentCommitJson = await fetch(apiParentCommitUrl).then((r) =>
-                r.json()
-            );
+            let parentCommitJson = this.cache.get(apiParentCommitUrl);
+            if (!parentCommitJson) {
+                parentCommitJson = await fetch(apiParentCommitUrl).then((r) =>
+                    r.json()
+                );
+                this.cache.set(apiParentCommitUrl, parentCommitJson);
+            }
 
             if (latestDate < parentCommitJson.commit.author.date) {
                 baseSha = parent.sha;
