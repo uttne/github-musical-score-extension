@@ -195,28 +195,31 @@ export class PullPageExtension {
     }
 
     _getMusicFileDiffContainerElms() {
-        const parentContainer = document.getElementsByClassName(
+        const parentContainers = document.getElementsByClassName(
             "js-diff-progressive-container"
-        )[0];
-        if (!parentContainer) return [];
-
-        const children = parentContainer.children ?? [];
+        );
+        if (!parentContainers) return [];
 
         const musicFileDiffContainers = [];
 
-        for (let i = 0; i < children.length; ++i) {
-            const child = children[i];
-            const path = this._getFilePath(child);
+        for (let k = 0; k < parentContainers.length; ++k) {
+            const parentContainer = parentContainers[k];
+            const children = parentContainer.children ?? [];
 
-            console.log(path);
+            for (let i = 0; i < children.length; ++i) {
+                const child = children[i];
+                const path = this._getFilePath(child);
 
-            const ext = path.split(".").slice(-1)[0].toLowerCase();
+                console.log(path);
 
-            if (ext !== "musicxml") {
-                continue;
+                const ext = path.split(".").slice(-1)[0].toLowerCase();
+
+                if (ext !== "musicxml") {
+                    continue;
+                }
+
+                musicFileDiffContainers.push(child);
             }
-
-            musicFileDiffContainers.push(child);
         }
 
         return musicFileDiffContainers;
