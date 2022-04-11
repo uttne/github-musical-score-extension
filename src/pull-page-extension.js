@@ -196,6 +196,10 @@ export class PullPageExtension {
                 const path = this._getFilePath(child);
 
                 console.log(path);
+                if (!path) {
+                    // path が取得できない場合はスキップする
+                    continue;
+                }
 
                 const ext = path.split(".").slice(-1)[0].toLowerCase();
 
