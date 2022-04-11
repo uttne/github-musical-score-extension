@@ -1,3 +1,4 @@
+import { CommitPageExtension } from "./commit-page-extension.js";
 import { PullPageExtension } from "./pull-page-extension.js";
 
 const scoreViewButtonId = "score-github-view-button-id";
@@ -160,6 +161,7 @@ class scoreManager {
 // --------------------------------------------------------------------------
 
 const pullPage = new PullPageExtension();
+const commitPage = new CommitPageExtension();
 const scoreM = new scoreManager();
 let pathnameCache = undefined;
 const observer = new MutationObserver(() => {
@@ -188,6 +190,14 @@ const observer = new MutationObserver(() => {
             }
         };
         pullPage.initAsync(callBack);
+    } else if (/^\/(.+?)\/(.+?)\/commit\/([0-9a-f]{40})/.test(pathnameCache)) {
+        // 非同期の初期化処理が失敗したときに再度処理が実行できるようにコールバックを設定する
+        const callBack = (result) => {
+            if (!result) {
+                pathnameCache = undefined;
+            }
+        };
+        commitPage.initAsync(callBack);
     }
 });
 window.onload = () => {

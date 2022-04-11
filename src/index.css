@@ -3,6 +3,7 @@
     height: auto;
 }
 
+/* pull page */
 .pull-page-image-root{
     display: flex;
     width: 100%;
@@ -26,6 +27,36 @@
     border: 1px solid rgb(8, 8, 8);
 }
 .pull-page-head-image > svg {
+    width: 100%;
+    height: auto;
+}
+
+/* commit page */
+.commit-page-image-root {
+    display: flex;
+    width: 100%;
+}
+
+.commit-page-base-image {
+    width: 50%;
+    background-color: white;
+    margin: 0.5rem 0.25rem 0.5rem 0.5rem;
+    border: 1px solid rgb(8, 8, 8);
+}
+
+.commit-page-base-image>svg {
+    width: 100%;
+    height: auto;
+}
+
+.commit-page-head-image {
+    width: 50%;
+    background-color: white;
+    margin: 0.5rem 0.5rem 0.5rem 0.25rem;
+    border: 1px solid rgb(8, 8, 8);
+}
+
+.commit-page-head-image>svg {
     width: 100%;
     height: auto;
 }
