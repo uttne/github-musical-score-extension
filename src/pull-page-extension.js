@@ -24,21 +24,6 @@ class ImageManager {
             "data highlight js-blob-wrapper pull-page-image-root";
         imageRootContainer.style.overflowX = "auto";
 
-        // const table = document.createElement("table");
-        // const tbody = document.createElement("tbody");
-        // const tr = document.createElement("tr");
-        // const baseTd = document.createElement("td");
-        // const headTd = document.createElement("td");
-
-        // tr.appendChild(baseTd);
-        // tr.appendChild(headTd);
-        // tbody.appendChild(tr);
-        // table.appendChild(tbody);
-        // imageRootContainer.appendChild(table);
-
-        // this.baseImageContainer = baseTd;
-        // this.headImageContainer = headTd;
-
         const baseImageContainer = document.createElement("div");
         baseImageContainer.className = "pull-page-base-image";
         const headImageContainer = document.createElement("div");
