@@ -26,8 +26,12 @@ class ImageManager {
 
         const baseImageContainer = document.createElement("div");
         baseImageContainer.className = "commit-page-base-image";
+        baseImageContainer.dataset.rawUrl = baseUrl;
+        if (!baseUrl) baseImageContainer.style.backgroundColor = "transparent";
         const headImageContainer = document.createElement("div");
         headImageContainer.className = "commit-page-head-image";
+        headImageContainer.dataset.rawUrl = headUrl;
+        if (!headUrl) headImageContainer.style.backgroundColor = "transparent";
         imageRootContainer.appendChild(baseImageContainer);
         imageRootContainer.appendChild(headImageContainer);
         this.baseImageContainer = baseImageContainer;
@@ -42,7 +46,7 @@ class ImageManager {
     }
 
     async initAsync() {
-        {
+        if (this.baseUrl) {
             const xml = await fetch(this.baseUrl).then((r) => r.text());
 
             const tk = new verovio.toolkit();
@@ -53,7 +57,7 @@ class ImageManager {
             this.baseTk = tk;
         }
 
-        {
+        if (this.headUrl) {
             const xml = await fetch(this.headUrl).then((r) => r.text());
 
             const tk = new verovio.toolkit();
@@ -324,6 +328,12 @@ export class CommitPageExtension {
             .filter((name) => /[.]musicxml$/.test(name.toLowerCase())).length;
         console.log(`musicxml count: ${fileCount}`);
 
+        const fileStatus = {};
+        for (let i = 0; i < commitJson.files.length; ++i) {
+            const file = commitJson.files[i];
+            fileStatus[file.filename] = file.status;
+        }
+
         const parents = commitJson.parents;
 
         let latestDate = "";
@@ -352,6 +362,7 @@ export class CommitPageExtension {
             base: baseSha,
             head: headSha,
             fileCount: fileCount,
+            fileStatus: fileStatus,
         };
     }
 
@@ -376,8 +387,16 @@ export class CommitPageExtension {
 
             const relativeFilePath = this._getFilePath(elm);
 
-            const baseFileUrl = `https://raw.githubusercontent.com/${info.owner}/${info.repo}/${info.base}/${relativeFilePath}`;
-            const headFileUrl = `https://raw.githubusercontent.com/${info.owner}/${info.repo}/${info.head}/${relativeFilePath}`;
+            const status = info.fileStatus[relativeFilePath];
+
+            const baseFileUrl =
+                status === "added"
+                    ? ""
+                    : `https://raw.githubusercontent.com/${info.owner}/${info.repo}/${info.base}/${relativeFilePath}`;
+            const headFileUrl =
+                status === "removed"
+                    ? ""
+                    : `https://raw.githubusercontent.com/${info.owner}/${info.repo}/${info.head}/${relativeFilePath}`;
 
             const imageManager = new ImageManager(
                 elm,
