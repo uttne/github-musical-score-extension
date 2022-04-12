@@ -60,3 +60,21 @@
     width: 100%;
     height: auto;
 }
+
+/* blob page */
+.blob-page-image-root {
+    display: flex;
+    width: 100%;
+}
+
+.blob-page-head-image{
+    width: 100%;
+    background-color: white;
+    margin: 0.5rem 0.5rem 0.5rem 0.5rem;
+    border: 1px solid rgb(8, 8, 8);
+}
+
+.blob-page-head-image>svg {
+    width: 100%;
+    height: auto;
+}
