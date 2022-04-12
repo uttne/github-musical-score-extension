@@ -1,12 +1,12 @@
 {
     "name": "GitHub Musical Score Extension",
     "description": "GitHub で MusicXML を画像で表示する拡張機能",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "manifest_version": 3,
     "permissions": [
         "scripting"
     ],
-    "host_permissions":[
+    "host_permissions": [
         "https://github.com/"
     ],
     "icons": {
