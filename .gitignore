@@ -132,3 +132,4 @@ dist
 
 verovio-toolkit.js
 *.zip
+build/
