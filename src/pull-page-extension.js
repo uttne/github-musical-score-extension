@@ -41,6 +41,14 @@ class ImageManager {
         this.xmlRootContainer = this.rootContainer.children[0];
     }
 
+    _tweak() {
+        // 比較画面では画像が小さくなるため音符の縦の棒が見えなくなってしまうことがある
+        // そのため微調整として縦の棒の幅を大きくする
+        document
+            .querySelectorAll('g[id^="stem-"] rect')
+            .forEach((r) => r.setAttribute("width", "40"));
+    }
+
     async initAsync() {
         {
             const xml = await fetch(this.baseUrl).then((r) => r.text());
@@ -94,6 +102,8 @@ class ImageManager {
 
         this.baseImageContainer.innerHTML = this.baseSvg;
         this.headImageContainer.innerHTML = this.headSvg;
+
+        this._tweak();
     }
     next() {
         if (
@@ -126,6 +136,8 @@ class ImageManager {
 
         this.baseImageContainer.innerHTML = this.baseSvg;
         this.headImageContainer.innerHTML = this.headSvg;
+
+        this._tweak();
     }
 
     showScore() {
@@ -140,6 +152,8 @@ class ImageManager {
             imageRootContainer = this.imageRootContainer;
             this.rootContainer.appendChild(imageRootContainer);
         }
+
+        this._tweak();
     }
 
     hideScore() {
